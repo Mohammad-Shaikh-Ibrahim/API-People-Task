@@ -6,19 +6,19 @@ import {
 import useSearch from "../hooks/useSearch";
 import useGetPosts from "../hooks/useGetPeople";
 
-let debounceTimer: ReturnType<typeof setTimeout>;
+let filterTimer: ReturnType<typeof setTimeout>;
 
 const PeopleByReactQuery = () => {
-  const [filter, setFilter] = useState<string>("");
-  const [debouncedFilter, setDebouncedFilter] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
+  const [filterPeople, setFilterPeople] = useState<string>("");
   const [pageUrl, setPageUrl] = useState<string | null>(null);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setFilter(value);
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      setDebouncedFilter(value);
+    setSearch(value);
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(() => {
+      setFilterPeople(value);
     }, 500);
   };
 
@@ -27,7 +27,7 @@ const PeopleByReactQuery = () => {
     isLoading: isSearchLoading,
     isError: isSearchError,
     error: searchError
-  } = useSearch(debouncedFilter);
+  } = useSearch(filterPeople);
 
   const {
     data: peopleData,
@@ -36,7 +36,7 @@ const PeopleByReactQuery = () => {
     error: peopleError
   } = useGetPosts(pageUrl);
 
-  const people = debouncedFilter ? searchData : peopleData?.results;
+  const people = filterPeople ? searchData : peopleData?.results;
   const isLoading = isSearchLoading || isPeopleLoading;
   const isError = isSearchError || isPeopleError;
   const error = searchError || peopleError;
@@ -50,7 +50,7 @@ const PeopleByReactQuery = () => {
       <TextField
         label="Search by name"
         variant="outlined"
-        value={filter}
+        value={search}
         onChange={handleFilterChange}
         fullWidth
         placeholder="Enter a name"
@@ -63,7 +63,7 @@ const PeopleByReactQuery = () => {
           variant="outlined"
           color="primary"
           onClick={() => setPageUrl(peopleData?.previous || null)}
-          disabled={!peopleData?.previous || !!debouncedFilter}
+          disabled={!peopleData?.previous || !!filterPeople}
         >
           Previous
         </Button>
@@ -71,7 +71,7 @@ const PeopleByReactQuery = () => {
           variant="outlined"
           color="primary"
           onClick={() => setPageUrl(peopleData?.next || null)}
-          disabled={!peopleData?.next || !!debouncedFilter}
+          disabled={!peopleData?.next || !!filterPeople}
         >
           Next
         </Button>
@@ -123,7 +123,7 @@ const PeopleByReactQuery = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    {debouncedFilter ? "No results found" : "No data"}
+                    {filterPeople ? "No results found" : "No data"}
                   </TableCell>
                 </TableRow>
               )}
