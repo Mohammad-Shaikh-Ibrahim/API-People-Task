@@ -3,8 +3,8 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import type { Person } from "../types/index";
 import axios from "axios";
 
-const fetchPeople = async (q: string): Promise<Person[]> => {
-  const res = await axios.get(`https://swapi.dev/api/people/?search=${q}`);
+const fetchPeople = async (searchResult: string): Promise<Person[]> => {
+  const res = await axios.get(`https://swapi.dev/api/people/?search=${searchResult}`);
   if (res.status === 200) {
     return res.data.results;
   }
@@ -12,13 +12,13 @@ const fetchPeople = async (q: string): Promise<Person[]> => {
 };
 
 
-const useSearch = (q: string): UseQueryResult<Person[]> => {
+const useSearch = (searchResult: string): UseQueryResult<Person[]> => {
   return useQuery<Person[]>({
-    queryKey: ["people", "search", q],
-    queryFn: () => fetchPeople(q),
+    queryKey: ["people", "search", searchResult],
+    queryFn: () => fetchPeople(searchResult),
     staleTime: 1000 * 60 * 5,
-    enabled: q.length > 0, 
     refetchInterval: 1000 * 60 * 5, 
+    enabled: !!searchResult, 
   });
 };
 

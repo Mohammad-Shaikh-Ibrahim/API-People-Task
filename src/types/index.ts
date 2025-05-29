@@ -1,10 +1,10 @@
 export interface PeopleResponse {
-  results: Person[];
+  currentPage: Person[];
   next: string | null;
   previous: string | null;
 }
 
-export type Person ={
+export interface Person{
   name: string;
   height: string;
   mass: string;

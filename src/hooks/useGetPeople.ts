@@ -9,7 +9,7 @@ const fetchPeople = async (pageUrl: string | null): Promise<PeopleResponse> => {
   const url = pageUrl || "https://swapi.dev/api/people/";
   const res = await axios.get(url);
   return {
-    results: res.data.results,
+    currentPage: res.data.results,
     next: res.data.next,
     previous: res.data.previous,
   };
@@ -20,7 +20,7 @@ const useGetPosts = (pageUrl: string | null): UseQueryResult<PeopleResponse> => 
     queryKey: ["people", pageUrl],
     queryFn: () => fetchPeople(pageUrl),
     staleTime: 1000 * 60 * 5,
-    
+    refetchInterval: 1000 * 60 * 5, 
   });
 };
 

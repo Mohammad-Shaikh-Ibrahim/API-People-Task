@@ -36,7 +36,7 @@ const PeopleByReactQuery = () => {
     error: peopleError
   } = useGetPosts(pageUrl);
 
-  const people = filterPeople ? searchData : peopleData?.results;
+  const people = filterPeople ? searchData : peopleData?.currentPage;
   const isLoading = isSearchLoading || isPeopleLoading;
   const isError = isSearchError || isPeopleError;
   const error = searchError || peopleError;
