@@ -3,7 +3,9 @@ import {
   TextField, Typography, Box, CircularProgress, Button, Table, TableHead,
   TableRow, TableCell, TableBody, TableContainer, Paper
 } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query"; 
 import useSearch from "../hooks/useSearch";
+import {fetchPeople} from "../hooks/useSearch";
 import useGetPosts from "../hooks/useGetPeople";
 
 let filterTimer: ReturnType<typeof setTimeout>;
@@ -13,15 +15,25 @@ const PeopleByReactQuery = () => {
   const [filterPeople, setFilterPeople] = useState<string>("");
   const [pageUrl, setPageUrl] = useState<string | null>(null);
 
+  const queryClient = useQueryClient(); 
+
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
     clearTimeout(filterTimer);
+
+    if (value.trim()) {
+      queryClient.prefetchQuery({
+        queryKey: ["people", "search", value],
+        queryFn: () => fetchPeople(value),
+        staleTime: 1000 * 60 * 5,
+      });
+    }
+
     filterTimer = setTimeout(() => {
       setFilterPeople(value);
     }, 500);
   };
-
   const {
     data: searchData,
     isLoading: isSearchLoading,
