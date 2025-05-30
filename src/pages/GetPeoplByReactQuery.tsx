@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchPeople } from "../hooks/useSearch";
 import type { RootState, AppDispatch } from "../stores/store";
 import { setSearchQuery } from "../features/searchSlice";
+import { setPeople } from "../features/peopleSlice";
 import useSearch from "../hooks/useSearch";
 import useGetPeople from "../hooks/useGetPeople";
 
@@ -22,7 +23,7 @@ import {
   Paper,
 } from "@mui/material";
 
-const PeopleByReactQuery = () => {
+const PeopleByReactQuery: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [pageUrl, setPageUrl] = useState<string | null>(null);
 
@@ -30,6 +31,7 @@ const PeopleByReactQuery = () => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch<AppDispatch>();
   const search = useSelector((state: RootState) => state.search.query);
+   const peopleList = useSelector((state: RootState) => state.people.people);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -49,7 +51,7 @@ const PeopleByReactQuery = () => {
     filterTimer.current = setTimeout(() => {
       setDebouncedSearch(value);
       dispatch(setSearchQuery(value));
-    }, 500);
+    }, 250);
   };
 
   const {
@@ -66,7 +68,13 @@ const PeopleByReactQuery = () => {
     error: peopleError,
   } = useGetPeople(pageUrl, { enabled: !debouncedSearch });
 
-  const people = debouncedSearch ? searchData : peopleData?.currentPage;
+if (debouncedSearch && searchData && searchData !== peopleList) {
+  dispatch(setPeople(searchData));
+} else if (!debouncedSearch && peopleData?.currentPage && peopleData.currentPage !== peopleList) {
+  dispatch(setPeople(peopleData.currentPage));
+}
+
+  const people = peopleList;
   const isLoading = isSearchLoading || isPeopleLoading;
   const isError = isSearchError || isPeopleError;
   const error = searchError || peopleError;

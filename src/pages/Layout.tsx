@@ -21,9 +21,17 @@ const Layout = () => {
           <Button
             variant="outlined"
             color="primary"
+            sx={{ mr: 2 }}
             onClick={() => navigate('/people-react-query')}
           >
             Get People (React Query)
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate('/people-redux-thunk')}
+          >
+            Get People (Redux + Thunk)
           </Button>
         </Toolbar>
       </AppBar>

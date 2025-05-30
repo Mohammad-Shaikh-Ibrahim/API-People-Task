@@ -18,12 +18,7 @@ const peopleSlice = createSlice({
       state.people = action.payload
     }
   },
-  extraReducers: (builder) => {
-    builder.addCase('people/fetchPeople', (state, action: { type: 'people/fetchPeople'; payload: Person[] }) => {
-      state.people = action.payload
-    })
-  },
 })
 
-export const peopleActions = peopleSlice.actions
+export const {setPeople} = peopleSlice.actions
 export default peopleSlice.reducer
