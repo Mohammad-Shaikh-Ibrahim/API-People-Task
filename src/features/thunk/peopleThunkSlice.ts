@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { fetchPeopleByUrl, fetchPeopleBySearch } from './peopleThunk';
-import type { PeopleState, Person } from '../../types/index';
+import type { PeopleResponse, PeopleState} from '../../types/index';
 
 const initialState: PeopleState = {
   data: null,
@@ -23,14 +23,10 @@ const peopleSlice = createSlice({
         fetchPeopleByUrl.fulfilled,
         (
           state,
-          action: PayloadAction<{ results: Person[]; next: string | null; previous: string | null }>
+          action: PayloadAction<PeopleResponse>
         ) => {
           state.loading = false;
-          state.data = {
-            results: action.payload.results,
-            next: action.payload.next,
-            previous: action.payload.previous,
-          };
+          state.data = action.payload;
         }
       )
       .addCase(fetchPeopleByUrl.rejected, (state, action) => {
@@ -44,14 +40,10 @@ const peopleSlice = createSlice({
         fetchPeopleBySearch.fulfilled,
         (
           state,
-          action: PayloadAction<{ results: Person[]; next: string | null; previous: string | null }>
+          action: PayloadAction<PeopleResponse>
         ) => {
           state.loading = false;
-          state.data = {
-            results: action.payload.results,
-            next: action.payload.next,
-            previous: action.payload.previous,
-          };
+          state.data = action.payload;
         }
       )
       .addCase(fetchPeopleBySearch.rejected, (state, action) => {
