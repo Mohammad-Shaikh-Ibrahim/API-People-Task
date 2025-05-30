@@ -90,11 +90,16 @@ const GetPeople: React.FC = () => {
                   <TableCell>{person.eye_color}</TableCell>
                   <TableCell>{person.birth_year}</TableCell>
                   <TableCell>{person.gender}</TableCell>
-                  <TableCell>{new Date(person.created).toLocaleString()}</TableCell>
-                  <TableCell>{new Date(person.edited).toLocaleString()}</TableCell>
+                  <TableCell>{new Date(person.created).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(person.edited).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <a href={person.homeworld} target="_blank" rel="noopener noreferrer">
-                      Homeworld
+                    <a
+                        href={person.homeworld}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#1976d2", textDecoration: "underline" }}
+                    >
+                        View
                     </a>
                   </TableCell>
                 </TableRow>

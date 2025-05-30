@@ -1,26 +1,42 @@
-import { useState } from "react";
-import {
-  TextField, Typography, Box, CircularProgress, Button, Table, TableHead,
-  TableRow, TableCell, TableBody, TableContainer, Paper
-} from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query"; 
+import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPeople } from "../hooks/useSearch";
+import type { RootState, AppDispatch } from "../stores/store";
+import { setSearchQuery } from "../features/searchSlice";
 import useSearch from "../hooks/useSearch";
-import {fetchPeople} from "../hooks/useSearch";
-import useGetPosts from "../hooks/useGetPeople";
+import useGetPeople from "../hooks/useGetPeople";
 
-let filterTimer: ReturnType<typeof setTimeout>;
+import {
+  TextField,
+  Typography,
+  Box,
+  CircularProgress,
+  Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
+  Paper,
+} from "@mui/material";
 
 const PeopleByReactQuery = () => {
-  const [search, setSearch] = useState<string>("");
-  const [filterPeople, setFilterPeople] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [pageUrl, setPageUrl] = useState<string | null>(null);
 
-  const queryClient = useQueryClient(); 
+  const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch<AppDispatch>();
+  const search = useSelector((state: RootState) => state.search.query);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setSearch(value);
-    clearTimeout(filterTimer);
+
+    if (filterTimer.current) {
+      clearTimeout(filterTimer.current);
+    }
 
     if (value.trim()) {
       queryClient.prefetchQuery({
@@ -30,25 +46,27 @@ const PeopleByReactQuery = () => {
       });
     }
 
-    filterTimer = setTimeout(() => {
-      setFilterPeople(value);
+    filterTimer.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      dispatch(setSearchQuery(value));
     }, 500);
   };
+
   const {
     data: searchData,
     isLoading: isSearchLoading,
     isError: isSearchError,
-    error: searchError
-  } = useSearch(filterPeople);
+    error: searchError,
+  } = useSearch(debouncedSearch);
 
   const {
     data: peopleData,
     isLoading: isPeopleLoading,
     isError: isPeopleError,
-    error: peopleError
-  } = useGetPosts(pageUrl);
+    error: peopleError,
+  } = useGetPeople(pageUrl, { enabled: !debouncedSearch });
 
-  const people = filterPeople ? searchData : peopleData?.currentPage;
+  const people = debouncedSearch ? searchData : peopleData?.currentPage;
   const isLoading = isSearchLoading || isPeopleLoading;
   const isError = isSearchError || isPeopleError;
   const error = searchError || peopleError;
@@ -67,7 +85,6 @@ const PeopleByReactQuery = () => {
         fullWidth
         placeholder="Enter a name"
         sx={{ mb: 3 }}
-        autoFocus
       />
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
@@ -75,7 +92,7 @@ const PeopleByReactQuery = () => {
           variant="outlined"
           color="primary"
           onClick={() => setPageUrl(peopleData?.previous || null)}
-          disabled={!peopleData?.previous || !!filterPeople}
+          disabled={!peopleData?.previous || !!debouncedSearch}
         >
           Previous
         </Button>
@@ -83,7 +100,7 @@ const PeopleByReactQuery = () => {
           variant="outlined"
           color="primary"
           onClick={() => setPageUrl(peopleData?.next || null)}
-          disabled={!peopleData?.next || !!filterPeople}
+          disabled={!peopleData?.next || !!debouncedSearch}
         >
           Next
         </Button>
@@ -105,9 +122,20 @@ const PeopleByReactQuery = () => {
           <Table>
             <TableHead>
               <TableRow>
-                {["Name", "Height", "Mass", "Hair Color", "Skin Color", "Eye Color", "Birth Year", "Gender", "Created", "Edited", "Homeworld"]
-                  .map((header) => (
-                    <TableCell key={header}>{header}</TableCell>
+                {[
+                  "Name",
+                  "Height",
+                  "Mass",
+                  "Hair Color",
+                  "Skin Color",
+                  "Eye Color",
+                  "Birth Year",
+                  "Gender",
+                  "Created",
+                  "Edited",
+                  "Homeworld",
+                ].map((header) => (
+                  <TableCell key={header}>{header}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
@@ -123,11 +151,16 @@ const PeopleByReactQuery = () => {
                     <TableCell>{person.eye_color}</TableCell>
                     <TableCell>{person.birth_year}</TableCell>
                     <TableCell>{person.gender}</TableCell>
-                    <TableCell>{new Date(person.created).toLocaleString()}</TableCell>
-                    <TableCell>{new Date(person.edited).toLocaleString()}</TableCell>
+                    <TableCell>{new Date(person.created).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(person.edited).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <a href={person.homeworld} target="_blank" rel="noopener noreferrer">
-                        Homeworld
+                      <a
+                        href={person.homeworld}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#1976d2", textDecoration: "underline" }}
+                      >
+                        View
                       </a>
                     </TableCell>
                   </TableRow>
@@ -135,7 +168,7 @@ const PeopleByReactQuery = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    {filterPeople ? "No results found" : "No data"}
+                    {debouncedSearch ? "No results found" : "No data"}
                   </TableCell>
                 </TableRow>
               )}
