@@ -1,5 +1,5 @@
 export interface PeopleResponse {
-  currentPage: Person[];
+  results: Person[];
   next: string | null;
   previous: string | null;
 }
@@ -16,4 +16,11 @@ export interface Person{
   created: string;
   edited: string;
   homeworld: string;
+}
+
+
+export interface PeopleState {
+  data: PeopleResponse | null;
+  loading: boolean;
+  error: string | null;
 }

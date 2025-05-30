@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchPeople } from "../hooks/useSearch";
+import { fetchPeopleBySearch } from "../hooks/useSearch";
 import type { RootState, AppDispatch } from "../stores/store";
-import { setSearchQuery } from "../features/searchSlice";
-import { setPeople } from "../features/peopleSlice";
+import { setSearchQuery } from "../features/query/searchSlice";
+import { setPeople } from "../features/query/peopleSlice";
 import useSearch from "../hooks/useSearch";
 import useGetPeople from "../hooks/useGetPeople";
 
@@ -43,7 +43,7 @@ const PeopleByReactQuery: React.FC = () => {
     if (value.trim()) {
       queryClient.prefetchQuery({
         queryKey: ["people", "search", value],
-        queryFn: () => fetchPeople(value),
+        queryFn: () => fetchPeopleBySearch(value),
         staleTime: 1000 * 60 * 5,
       });
     }
@@ -70,8 +70,8 @@ const PeopleByReactQuery: React.FC = () => {
 
 if (debouncedSearch && searchData && searchData !== peopleList) {
   dispatch(setPeople(searchData));
-} else if (!debouncedSearch && peopleData?.currentPage && peopleData.currentPage !== peopleList) {
-  dispatch(setPeople(peopleData.currentPage));
+} else if (!debouncedSearch && peopleData?.results && peopleData.results !== peopleList) {
+  dispatch(setPeople(peopleData.results));
 }
 
   const people = peopleList;
