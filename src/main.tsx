@@ -7,7 +7,17 @@ import store from './stores/store'
 import './index.css'
 import App from './App.tsx'
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(
+  {
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, 
+        refetchInterval: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+      },
+    },
+  }
+);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
